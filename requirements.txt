@@ -1,1 +1,2 @@
 pymongo==4.2.0
+-e git+https://github.com/AvinashGirme/Sensor_Fault_Detection.git@418981ff8ba8091eb3b02025d6e3514ffdcb4aca#egg=sensor
