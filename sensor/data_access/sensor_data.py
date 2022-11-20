@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd 
 import json
-from sensor.configuration.mongo_db_connection import MonogoDBClient
+from sensor.configuration.mongo_db_connection import MongoDBClient
 from sensor.constant.database import DATABASE_NAME
 from sensor.exception import SensorException
 
@@ -16,7 +16,7 @@ class SensorData:
     """
     def __init__(self):
         try:
-            self.mongo_client=MonogoDBClient(database_name=DATABASE_NAME)
+            self.mongo_client=MongoDBClient(database_name=DATABASE_NAME)
         except Exception as e:
             raise SensorException(e,sys)
 

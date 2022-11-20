@@ -10,6 +10,7 @@ from fastapi.responses import Response
 from starlette.responses import RedirectResponse
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
+from sensor.pipeline.training_pipeline import TrainPipeline
 
 
 env_file_path=os.path.join(os.getcwd(),"env.yaml")
@@ -39,14 +40,21 @@ async def index():
 @app.get("/train")
 async def train_route():
     try:
-        pass
+        train_pipeline=TrainPipeline()
+        if train_pipeline.is_pipeline_running:
+            return Response("Training pipeline is already running")
+        train_pipeline.run_pipeline()
+        return Response("Training Successful !!")
     except Exception as e:
+        raise SensorException(e, sys)
         return Response(f"Error Occurred! {e}")
         
 
 def main():
     try:
         set_env_variable(env_file_path)
+        training_pipeline=TrainPipeline()
+        training_pipeline.run_pipeline()
     
     except Exception as e:
         print(e)
