@@ -20,6 +20,7 @@ import shutil
 import pandas as pd 
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
+from sensor.pipeline import training_pipeline
 
 
 
@@ -60,7 +61,44 @@ async def train_route():
         return Response(f"Error Occurred! {e}")
 
 
+@app.post("/upload-file/") 
+async def create_upload_file(uploaded_file:UploadFile = File(...)):
+    try:
+        dir="/config/workspace/predict/input"
+        file_location=f"{dir}/{uploaded_file.filename}"
+        file_list=os.listdir(dir)
+        if uploaded_file.filename =="predict_sensorfault.csv":
+            if len(file_list)>0:
+                os.remove(file_location)
+        with open(file_location,"wb+") as file_object:
+            shutil.copyfileobj(uploaded_file.file, file_object)
         
+        return {"info": f"file '{uploaded_file.filename} saved at '{file_location}'"}
+    except Exception as e:
+        return Response(f"Error Occured! {e}")
+
+@app.get("/predict")
+async def predict_route():
+    try:
+        logging.info("Starting Prediction..")
+        df=pd.read_csv(r"/config/workspace/predict/input/predict_sensorfault.csv")
+        model_resolver = ModelResolver(model_dir=SAVED_MODEL_DIR)
+        if not model_resolver.is_model_exists():
+            return Response("Model is not available")
+
+        best_model_path=model_resolver.get_best_model_path()
+        model=load_object(file_path=best_model_path)
+        y_pred=model.predict(df)
+        df['predicted_column'] = y_pred
+        df['predicted_column'].replace(TargetValueMapping().reverse_mapping(),inplace=True)
+        dir="/config/workspace/predict/output"
+        #decide how to return file to user
+        output=df.to_csv(f"{dir}/predicted.csv")
+        output_file_path=f"{dir}/predicted.csv"
+        return FileResponse(output_file_path)
+    except Exception as e:
+        raise Response(f"Error Occured! {e}")
+
 
 def main():
     try:
