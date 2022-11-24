@@ -1,3 +1,4 @@
+from sensor.configuration.mongo_db_connection import MongoDBClient
 import os,sys
 from sensor.logger import logging
 from sensor.exception import SensorException
@@ -11,6 +12,15 @@ from starlette.responses import RedirectResponse
 from fastapi.responses import StreamingResponse
 from fastapi.responses import FileResponse
 from sensor.pipeline.training_pipeline import TrainPipeline
+from sensor.constant.training_pipeline import SAVED_MODEL_DIR
+from fastapi import FastAPI
+from sensor.ml.model.estimator import ModelResolver,TargetValueMapping
+from sensor.utils.main_utils import load_object
+import shutil
+import pandas as pd 
+from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse
+
 
 
 env_file_path=os.path.join(os.getcwd(),"env.yaml")
@@ -45,9 +55,11 @@ async def train_route():
             return Response("Training pipeline is already running")
         train_pipeline.run_pipeline()
         return Response("Training Successful !!")
+
     except Exception as e:
-        raise SensorException(e, sys)
         return Response(f"Error Occurred! {e}")
+
+
         
 
 def main():
