@@ -23,7 +23,6 @@ from fastapi.responses import FileResponse
 from sensor.pipeline import training_pipeline
 
 
-
 env_file_path=os.path.join(os.getcwd(),"env.yaml")
 
 def set_env_variable(env_file_path):
